@@ -1,0 +1,7 @@
+# NodeJS modules folder
+/node_modules/
+
+/.idea/
+
+# npm debug log
+npm-debug.log
