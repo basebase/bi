@@ -12,6 +12,8 @@ export default class Welcome extends React.Component {
     }
 
     render() {
+        // 当App组件使用时候可以<Welcome ...props>
+        // 然后Welcome可以通过获取传递过来的参数 {...this.props}
         const {num} = {...this.props}
         return (
             <div>
