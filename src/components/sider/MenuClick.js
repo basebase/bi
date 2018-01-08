@@ -12,6 +12,8 @@ export const handleClick = (item) => {
         history.push("/product")
     } else if (item.key === "/glayout") {
         history.push("/glayout")
+    } else if (item.key === "//csv_import") {
+        history.push("//csv_import")
     }
 
     // 由于使用history.push()无法跳转...!所以这里手动刷新一次...!

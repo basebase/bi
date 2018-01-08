@@ -22,7 +22,7 @@ const menus = [
         icon: '/glayout',
     },
     {
-        key: 'overview',
+        key: 'dataimport',
         name: '数据导入',
         icon: 'database',
         child: [

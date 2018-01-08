@@ -41,7 +41,7 @@ export default class Sider extends React.Component {
       this.setState({ current: item.key });
       this.changeCookie(item.key)
       // 处理点击跳转, 页面可能会多, 所以抽离到另外一个js文件, 单独修改
-      handleClick(item)
+      // handleClick(item)
 
   }
 
@@ -52,7 +52,8 @@ export default class Sider extends React.Component {
         <div id="leftMenu">
           <img src={ logo } width="50" id="logo" onClick={this.toggleCollapsed} />
 
-          <Router>
+            {/*这里为什么加了Router..?不知道当时怎么想的,抄代码都没有思考...!*/}
+          {/*<Router>*/}
               <Menu
                   onClick={this.handleClick}
                   mode={'inline'}
@@ -60,7 +61,7 @@ export default class Sider extends React.Component {
               >
                   {getMenus(menus)}
               </Menu>
-          </Router>
+          {/*</Router>*/}
 
           {/*<div id="copyright">Copyright © Jason</div>*/}
         </div>
