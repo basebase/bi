@@ -3,8 +3,8 @@
  */
 
 import React from 'react'
-import { Upload, Button, Icon, Card } from 'antd';
-
+import { Upload, Button, Icon, Card, Row, Col, message } from 'antd';
+import FileUpload from '../fileuoload'
 const { Meta } = Card;
 
 export default class CsvImport extends React.Component {
@@ -15,7 +15,9 @@ export default class CsvImport extends React.Component {
     render() {
         return(
             <div>
-                Hello...
+                <Card title="从CSV文件导入数据" extra={<a href="#">More</a>}>
+                    <FileUpload />
+                </Card>
             </div>
         )
     }

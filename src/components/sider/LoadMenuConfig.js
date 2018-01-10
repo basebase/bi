@@ -30,7 +30,7 @@ export const getMenus = (menuArray, parentPath = '/') => {
         return (
             <Menu.Item key={linkTo}>
                 <span>{item.icon ? <Icon type={item.icon} /> : ''}</span>
-                <span><Link to={linkTo}>{item.name}</Link></span>
+                <span><Link style= {{ color: "#000000" }} to={linkTo}>{item.name}</Link></span>
             </Menu.Item>
         );
     });
