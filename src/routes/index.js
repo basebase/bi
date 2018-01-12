@@ -9,6 +9,8 @@ import Welcome from '../components/welcome'
 import CsvImport from '../components/dataimport/csv/index'
 import DB from '../components/dataimport/db/index'
 
+import Configuration from '../components/dataimport/config'
+
 const routes = (
     <div>
         <Switch>
@@ -16,6 +18,7 @@ const routes = (
                 <Route path="/operating" component={Welcome}/>
                 <Route exact path="/dataimport/csv_import" component={ CsvImport }/>
                 <Route exact path="/dataimport/database_import" component={ DB }/>
+                <Route exact path="/dataimport/config_meta" component={ Configuration }/>
             </App>
         </Switch>
     </div>

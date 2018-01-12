@@ -3,7 +3,33 @@
  */
 
 import React from 'react'
-import { Card, Row, Col } from 'antd'
+import { Card, Row, Col, Table } from 'antd'
+
+
+const columns = [{
+    title: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+    render: text => <a href="#">{text}</a>,
+}, {
+    title: 'Type',
+    dataIndex: 'type',
+    key: 'type',
+}]
+
+const data = [{
+    key: '1',
+    name: 'source_01',
+    type: 'varchar',
+}, {
+    key: '2',
+    name: 'source_02',
+    type: 'bigint',
+}, {
+    key: '3',
+    name: 'source_03',
+    type: 'boolean',
+}];
 
 export default class DB extends React.Component {
     constructor(props) {
@@ -15,15 +41,12 @@ export default class DB extends React.Component {
             <div>
                 <Card title="数据关系映射" extra={<a href="#">More</a>}>
                     <Row gutter={16}>
-                        <Col span={10}>
-                            <p>source_01 varchar</p>
-                            <p>source_02 int</p>
-                            <p>source_03 boolean</p>
+                        <Col span={8}>
+                            <Table  pagination={false} columns={columns}  dataSource={data} />
                         </Col>
-                        <Col span={12}>
-                            <p>target_01 varchar</p>
-                            <p>target_02 int</p>
-                            <p>target_03 boolean</p>
+                        <Col span={8} />
+                        <Col span={8}>
+                            <Table  pagination={false} columns={columns}  dataSource={data} />
                         </Col>
                     </Row>
                 </Card>

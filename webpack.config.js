@@ -57,6 +57,7 @@ const config = {
     },
     output: {
         path: __dirname + '/dist',
+        // publicPath如果加入了/那么则index.html中的dist路径前面也需要加上/,否则二级目录找不到编译文件
         publicPath: '/',
         filename: 'bundle.js'
     },
