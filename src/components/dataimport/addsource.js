@@ -50,11 +50,26 @@ export default class AddSource extends React.Component {
 
     handleOk = () => {
         // 设置input值
-        this.setModalInputValues()
+        let inputs = this.setModalInputValues()
         this.setState({ loading: true });
-        setTimeout(() => {
+        const url = "http://localhost:8088/api/addSourceConfig"
+        axios({
+            url: url,
+            method: 'post',
+            data: JSON.stringify(inputs),
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then((res) => {
             this.setState({ loading: false, visible: false });
-        }, 3000);
+            message.success(res.data.data)
+        }).catch((error) => {
+            this.setState({ loading: false, visible: false });
+            message.error(error.response.data.message)
+        })
+        // setTimeout(() => {
+        //     this.setState({ loading: false, visible: false });
+        // }, 3000);
     }
 
     handleCancel = () => {

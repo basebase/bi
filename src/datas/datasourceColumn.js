@@ -3,20 +3,30 @@
  */
 
 import axios from 'axios'
+import { message } from 'antd'
 
 // 从服务器端请求数据
 
 export const getDBSourceTable = (url) => {
+    var data = [{}]
     axios({
         url: url,
         method: 'post',
-        data: JSON.stringify(inputs),
+        data: null,
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         }
     }).then((res) => {
-        message.success(res.data.data)
+        // debugger
+        // message.success(res.data.data)
+        data = res.data.data
+        console.log("data => ", data)
     }).catch((error) => {
         message.error(error.response.data.message)
     })
+
+    return data
 }
+
+
+

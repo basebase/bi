@@ -6,8 +6,14 @@ import React from 'react'
 import { Button, Input, Select, Card, Table, Row, Col } from 'antd'
 import AddSource from './addsource'
 
+import { getDBSourceTable } from '../../datas/datasourceColumn'
+
 const Search = Input.Search
 const Option = Select.Option
+
+
+
+var col = `${getDBSourceTable("http://localhost:8088/api/getSourceConfig")}`
 
 
 
@@ -20,7 +26,7 @@ const columns = [{
 }, {
     title: '数据源描述',
     dataIndex: 'sourceDescribe',
-}];
+},];
 
 const data = [{
     key: '1',
