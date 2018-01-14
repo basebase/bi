@@ -4,8 +4,11 @@
 
 import React from 'react'
 import propTypes from 'prop-types'
-import { Button, Modal, Card, Input, message } from 'antd'
+import { Button, Modal, Card, Input, message, Select } from 'antd'
 import axios from 'axios'
+
+const Option = Select.Option;
+
 
 export default class AddSource extends React.Component {
     constructor(props) {
@@ -13,7 +16,7 @@ export default class AddSource extends React.Component {
         this.state = {
             loading: false,
             visible: false,
-            inputs: null,
+            option: '',
         }
     }
 
@@ -23,6 +26,13 @@ export default class AddSource extends React.Component {
         });
     }
 
+    onSelectOptionChange = (value) => {
+        this.setState({
+            option: value
+        })
+        console.log("value", value)
+    }
+
     // 获取input标签数据
     setModalInputValues = () => {
         let data_source_name = this.refs.data_source_name.input.value
@@ -30,6 +40,7 @@ export default class AddSource extends React.Component {
         let jdbc_url = this.refs.jdbc_url.input.value
         let db_name = this.refs.db_name.input.value
         let db_password = this.refs.db_password.input.value
+
         // let inputs = [data_source_name, data_source_desc, jdbc_url, db_name, db_password]
 
         let inputs = {
@@ -37,8 +48,11 @@ export default class AddSource extends React.Component {
             "dataSourceDesc": data_source_desc,
             "jdbcUrl": jdbc_url,
             "dbName": db_name,
-            "dbPassword": db_password
+            "dbPassword": db_password,
+            "option": this.state.option
         }
+
+        console.log("inputs", inputs)
 
         return inputs
         // 不能及时响应
@@ -132,8 +146,17 @@ export default class AddSource extends React.Component {
                         数据源名称 <Input ref='data_source_name' placeholder="请输入数据源名称" />
                     </div>
 
-                    <div>
+                    <div style={{ marginBottom: "10px" }}>
                         数据源描述 <Input ref='data_source_desc' placeholder="请输入数据源名称" />
+                    </div>
+
+                    <div>
+                        数据类型
+                        <Select onChange={this.onSelectOptionChange} style={{ width: 220 }}>
+                            <Option value="mysql">mysql</Option>
+                            <Option value="oracle">oracle</Option>
+                            <Option value="hive">hive</Option>
+                        </Select>
                     </div>
 
                     <div>
