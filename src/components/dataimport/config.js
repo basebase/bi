@@ -6,21 +6,24 @@ import React from 'react'
 import { Button, Input, Select, Card, Table, Row, Col } from 'antd'
 import AddSource from './addsource'
 
-import { getDBSourceTable } from '../../datas/datasourceColumn'
+import { getDBSourceTable, getDBSourceTable_s } from '../../datas/datasourceColumn'
 
 const Search = Input.Search
 const Option = Select.Option
 
 
 
-var col = `${getDBSourceTable("http://localhost:8088/api/getSourceConfig")}`
+// debugger
+const column_s = `${getDBSourceTable_s("http://localhost:8088/api/getSourceConfig")}`
+const cols = JSON.parse(column_s)
 
 
 
 const columns = [{
     title: '数据源名称',
     dataIndex: 'sourceName',
-}, {
+},
+    {
     title: '数据源类型',
     dataIndex: 'sourceType',
 }, {
@@ -64,6 +67,11 @@ export default class Configuration extends React.Component {
     constructor(props) {
         super(props)
     }
+
+    // componentDidMount() {
+    //     let column_s = `${getDBSourceTable_s("http://localhost:8088/api/getSourceConfig")}`
+    //     console.log("console_s", column_s)
+    // }
 
     search_data_source = (value) => {
         console.log(value)
@@ -123,7 +131,7 @@ export default class Configuration extends React.Component {
                 </Card>
 
                 <Card title="数据源展示域">
-                    <Table size="small" rowSelection={rowSelection} columns={columns} dataSource={data} />
+                    <Table size="small" rowSelection={rowSelection} columns={columns} dataSource={cols} />
                 </Card>
             </div>
         )

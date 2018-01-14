@@ -3,7 +3,29 @@
  */
 
 import axios from 'axios'
+import $ from 'jquery'
 import { message } from 'antd'
+
+
+export const getDBSourceTable_s = (url) => {
+    let result = undefined
+    $.ajax({
+        url: url,
+        async:false, //或false,是否异步
+        type: 'POST',
+        dataType: 'json',
+        cache: false,
+        success: function(data) {
+            console.log("data", data.data)
+            result = JSON.stringify(data.data)
+        }.bind(this),
+        error: function(xhr, status, err) {
+            console.error("err", err.toString());
+        }.bind(this)
+    });
+    return result
+}
+
 
 // 从服务器端请求数据
 
@@ -27,6 +49,7 @@ export const getDBSourceTable = (url) => {
 
     return data
 }
+
 
 
 

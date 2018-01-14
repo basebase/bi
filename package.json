@@ -44,6 +44,7 @@
     "identity-obj-proxy": "^3.0.0",
     "image-webpack-loader": "^3.4.2",
     "jest": "^20.0.4",
+    "jquery": "^3.2.1",
     "layui-src": "^2.2.5",
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
