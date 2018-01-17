@@ -30,7 +30,6 @@ export default class AddSource extends React.Component {
         this.setState({
             option: value
         })
-        console.log("value", value)
     }
 
     // 获取input标签数据
@@ -52,7 +51,6 @@ export default class AddSource extends React.Component {
             "option": this.state.option
         }
 
-        console.log("inputs", inputs)
 
         return inputs
         // 不能及时响应

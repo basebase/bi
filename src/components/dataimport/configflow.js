@@ -94,7 +94,7 @@ class ConfigFlow extends React.Component {
             // 如果保存成功了，则跳转页面
             // 不过为了友好起见，我认为可以停留个3秒钟在跳转
             // 如果想要支持this.props.history.push()则需要添加withRouter(ConfigFlow)
-            this.props.history.push("/dataimport/csv_import")
+            this.props.history.push("/dataimport/task_manage")
 
         }).catch((error) => {
             message.error("配置保存失败, 请联系相关工作人员")
