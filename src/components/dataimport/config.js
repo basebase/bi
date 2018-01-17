@@ -15,7 +15,7 @@ const Option = Select.Option
 
 // debugger
 const column_s = `${getDBSourceTable_s("http://localhost:8088/api/getSourceConfig")}`
-const cols = column_s === undefined || column_s === null ? null : JSON.parse(column_s)
+const cols = column_s === "undefined" || column_s === null ? "" : JSON.parse(column_s)
 
 
 
