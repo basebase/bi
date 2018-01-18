@@ -39,9 +39,9 @@ export default class Task extends React.Component {
                 return (
                     <div>
                <span>
-                   <Icon type="file-text"/><a onClick={() => this.showTaskConfiguration(record.key)}>查看配置</a>
+                   <Icon type="file-text"/><a onClick={() => this.showTaskConfiguration(record.key, false)}>查看配置</a>
                    <Divider type="vertical"/>
-                   <Icon type="edit"/><a href={`http://localhost:8088/api/editTaskConfiguration/${record.key}`}>修改配置</a>
+                   <Icon type="edit"/><a onClick={() => this.showTaskConfiguration(record.key, true)}>修改配置</a>
                    <Divider type="vertical"/>
                    <Icon type="delete"/>
                    <a onClick={() => this.deleteTaskConfiguration(record.key)}>删除配置</a>
@@ -54,7 +54,7 @@ export default class Task extends React.Component {
         })
     }
 
-    showTaskConfiguration = (key) => {
+    showTaskConfiguration = (key, tag) => {
         const url = "http://localhost:8088/api/showTaskConfiguration"
         const data = {
             "id": key
@@ -77,11 +77,12 @@ export default class Task extends React.Component {
             json_data.targetSourcex = json_data.targetSource
             json_data.targetSourceTablex = json_data.targetSourceTable
             json_data.taskNamex = json_data.taskName
-            json_data.tag = false
+            json_data.tag = tag
+            json_data.config_id = key
         }
 
         Modal.info({
-            title: '任务配置信息查看',
+            title: '查看配置信息',
             width: "900",
             height:"800",
             content: (
@@ -118,8 +119,45 @@ export default class Task extends React.Component {
             onCancel() {
             },
         });
+    }
+
+    editTaskConfiguration = (key) => {
+        const url = "http://localhost:8088/api/editTaskConfiguration"
+        const data = {
+            "id": key
+        }
 
 
+        const resData = `${getData(url, JSON.stringify(data))}`
+        const json_data = (resData === "undefined" || resData === null ? "" : JSON.parse(resData))
+
+        if (json_data != null) {
+            let fieldM = $.parseJSON(json_data.fieldMapper)
+
+            // 没办法, 需要包装一下, 组件中已经存在相关的名称了...当时没考虑好...
+            json_data.fieldMapperx = fieldM
+            json_data.importAfterDatax = json_data.importAfterData
+            json_data.importBeforeDatax = json_data.importBeforeData
+            json_data.overwritex = json_data.overwrite
+            json_data.sourcex = json_data.source
+            json_data.sourceTablex = json_data.sourceTable
+            json_data.targetSourcex = json_data.targetSource
+            json_data.targetSourceTablex = json_data.targetSourceTable
+            json_data.taskNamex = json_data.taskName
+            json_data.tag = true
+        }
+
+        Modal.info({
+            title: '修改配置信息',
+            width: "900",
+            height:"800",
+            content: (
+                <div>
+                    <TaskConfig {...json_data} />
+                </div>
+            ),
+            onOk() {},
+        });
     }
 
     render() {

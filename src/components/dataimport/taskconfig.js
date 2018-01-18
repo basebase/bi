@@ -14,7 +14,12 @@ const Step = Steps.Step
 const { TextArea } = Input
 const Option = Select.Option
 
+var renderCount = 0
 
+// 源字段input refs数
+var source_inputs = []
+//目标字段refs数
+var target_inputs = []
 
 
 // 步骤1参数
@@ -31,6 +36,12 @@ var overwrite = null
 // 步骤三参数
 var taskName = null
 
+var fm = null
+
+var configId = null
+
+
+
 export default class TaskConfig extends React.Component {
     constructor(props) {
         super(props)
@@ -38,6 +49,7 @@ export default class TaskConfig extends React.Component {
             current: 0,
         }
     }
+
 
     next = () => {
         const current = this.state.current + 1
@@ -55,20 +67,37 @@ export default class TaskConfig extends React.Component {
 
 
     saveDBSyncConfiguration = () => {
-        const url = "http://localhost:8088/api/saveDBSyncConfiguration"
+        const url = "http://localhost:8088/api/editTaskConfiguration"
 
-        let skv1 = this.refs.s01.input.value + "-" + this.refs.s01_.input.value
-        let skv2 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
-        let skv3 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
+        let inputs_length = null
+
+        console.log("taskName", taskName)
+
+        if (source_inputs != null && target_inputs != null && source_inputs !== undefined && target_inputs !== undefined
+        && source_inputs !== "undefined" && target_inputs !== "undefined") {
+            inputs_length = source_inputs.length > target_inputs ? source_inputs.length : target_inputs.length
+        }
 
 
-        let tkv1 = this.refs.t01.input.value + "-" + this.refs.t01_.input.value
-        let tkv2 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
-        let tkv3 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
+        let fms = []
+        for(let i = 0; i <inputs_length; i++) {
+            let sourceData = source_inputs[i].split("-")
+            let targetData = target_inputs[i].split("-")
 
-        let fieldMapper = [[skv1, tkv1], [skv2, tkv2], [skv3, tkv3]]
-        let s = JSON.stringify(fieldMapper)
-        console.log("s", s)
+            let s_field = sourceData[0]
+            let s_field_type = sourceData[1]
+
+            let t_field = targetData[0]
+            let t_field_type = targetData[1]
+
+            let s = document.getElementById(s_field).value + "-" + document.getElementById(s_field_type).value
+            let f = document.getElementById(t_field).value + "-" + document.getElementById(t_field_type).value
+
+            let fm = [s, f]
+            fms.push(fm)
+        }
+
+        let s = JSON.stringify(fms)
 
         let data = {
             "source": source,
@@ -79,8 +108,10 @@ export default class TaskConfig extends React.Component {
             "importAfterData": importAfterData,
             "overwrite": overwrite,
             "taskName": taskName,
-            "fieldMapper": s
+            "fieldMapper": s,
+            "configId": configId,
         }
+
 
         axios({
             url: url,
@@ -95,7 +126,7 @@ export default class TaskConfig extends React.Component {
             // 如果保存成功了，则跳转页面
             // 不过为了友好起见，我认为可以停留个3秒钟在跳转
             // 如果想要支持this.props.history.push()则需要添加withRouter(ConfigFlow)
-            this.props.history.push("/dataimport/task_manage")
+            // this.props.history.push("/dataimport/task_manage")
 
         }).catch((error) => {
             message.error("配置保存失败, 请联系相关工作人员")
@@ -105,9 +136,27 @@ export default class TaskConfig extends React.Component {
 
     render() {
 
+        console.log("render...!")
 
-        const {fieldMapperx, importAfterDatax, importBeforeDatax,
+        const {fieldMapperx, config_id, importAfterDatax, importBeforeDatax,
             overwritex, sourcex, sourceTablex, targetSourcex, targetSourceTablex, taskNamex, tag} = {...this.props}
+        configId = config_id
+
+
+
+        source = sourcex
+        sourceTable = sourceTablex
+
+        targetSource = targetSourcex
+        targetSourceTable = targetSourceTablex
+        importBeforeData = importBeforeDatax
+        importAfterData = importAfterDatax
+        overwrite = overwritex
+
+        taskName = taskNamex
+        fm = JSON.stringify(fieldMapperx)
+
+
 
 
         let stepsContent = {
@@ -322,37 +371,73 @@ export default class TaskConfig extends React.Component {
             </div>
         }
 
+        const getSourceField = () => {
+            if (fieldMapperx !== null && fieldMapperx !== undefined && fieldMapperx !== "fieldMapperx") {
+                const sourceField = []
+                source_inputs = []
+                let count = 1
+
+                for (let data of fieldMapperx) {
+                    var ds = data[0].split('-')
+
+                    let field_ref = "s" + count
+                    let field_type_ref = "s" + count + "_"
+
+                    let inputG =
+                        <InputGroup compact>
+                            <Input id={field_ref} ref={field_ref} disabled={!tag} style={{ width: '20%' }} defaultValue={ds[0]} />
+                            <Input id={field_type_ref} ref={field_type_ref} disabled={!tag} style={{ width: '30%' }} defaultValue={ds[1]} />
+                        </InputGroup>
+
+                    source_inputs.push(field_ref + "-" + field_type_ref)
+                    ++count
+
+                    sourceField.push(inputG)
+
+                }
+                return sourceField
+            }
+        }
+
+
+        const getTargetField = () => {
+            if (fieldMapperx !== null && fieldMapperx !== undefined && fieldMapperx !== "fieldMapperx") {
+                const sourceField = []
+                target_inputs = []
+                let count = 1
+
+                for (let data of fieldMapperx) {
+                    var ds = data[1].split('-')
+
+                    let field_ref = "t" + count
+                    let field_type_ref = "t" + count + "_"
+
+                    let inputG =
+                        <InputGroup compact>
+                            <Input id={field_ref} ref={field_ref} disabled={!tag} style={{ width: '20%' }} defaultValue={ds[0]} />
+                            <Input id={field_type_ref} ref={field_type_ref} disabled={!tag} style={{ width: '30%' }} defaultValue={ds[1]} />
+                        </InputGroup>
+
+                    target_inputs.push(field_ref + "-" + field_type_ref)
+                    ++count
+
+                    sourceField.push(inputG)
+
+                }
+
+                return sourceField
+            }
+        }
+
         const fieldMapper = () => {
             return <div>
                 <Row gutter={8}>
                     <Col span={8}>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="s01" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="s01_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="s02" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="s02_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="s03" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="s03_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
+                        {getSourceField()}
                     </Col>
                     <Col span={8}/>
                     <Col span={8}>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="t01" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="t01_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="t02" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="t02_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input disabled={!tag} ref="t03" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input disabled={!tag} ref="t03_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
+                        {getTargetField()}
                     </Col>
                 </Row>
             </div>
