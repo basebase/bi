@@ -136,24 +136,24 @@ export default class TaskConfig extends React.Component {
 
     render() {
 
-        console.log("render...!")
+        console.log("render...!" + taskName)
 
         const {fieldMapperx, config_id, importAfterDatax, importBeforeDatax,
             overwritex, sourcex, sourceTablex, targetSourcex, targetSourceTablex, taskNamex, tag} = {...this.props}
         configId = config_id
 
 
+        // 原谅我lowB，点击下一步的时候会重新渲染组件，我就用这种方法绕过去
+        //
+        source = source !== null ? source : sourcex
+        sourceTable = sourceTable !== null ? sourceTable : sourceTablex
+        targetSource = targetSource !== null ? targetSource : targetSourcex
+        targetSourceTable = targetSourceTable !== null ? targetSourceTable : targetSourceTablex
+        importBeforeData = importBeforeData !== null ? importBeforeData : importBeforeDatax
+        importAfterData = importAfterData !== null ? importAfterData : importAfterDatax
+        overwrite = overwrite !== null ? overwrite : overwritex
 
-        source = sourcex
-        sourceTable = sourceTablex
-
-        targetSource = targetSourcex
-        targetSourceTable = targetSourceTablex
-        importBeforeData = importBeforeDatax
-        importAfterData = importAfterDatax
-        overwrite = overwritex
-
-        taskName = taskNamex
+        taskName = taskName !== null ? taskName : taskNamex
         fm = JSON.stringify(fieldMapperx)
 
 
