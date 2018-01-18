@@ -71,7 +71,7 @@ export default class Task extends React.Component {
             json_data.fieldMapperx = fieldM
             json_data.importAfterDatax = json_data.importAfterData
             json_data.importBeforeDatax = json_data.importBeforeData
-            json_data.overwritex = json_data.overwrite
+            json_data.overwritex = json_data.overwrite === 1 ? "是" : "否"
             json_data.sourcex = json_data.source
             json_data.sourceTablex = json_data.sourceTable
             json_data.targetSourcex = json_data.targetSource

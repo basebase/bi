@@ -351,7 +351,7 @@ export default class TaskConfig extends React.Component {
                         </Col>
                         <Col span={8}>
                             <Select
-                                defaultValue={() => overwritex == 1 ? '是' : '否'}
+                                defaultValue={overwritex}
                                 allowClear={!tag}
                                 disabled={!tag}
                                 showSearch
