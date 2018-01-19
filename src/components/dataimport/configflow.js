@@ -7,12 +7,15 @@ import { Steps, Button, message, Card, Select, Row, Col, Input } from 'antd'
 import {withRouter} from 'react-router-dom';
 // import routes from '../../routes/index'
 import axios from 'axios'
+import $ from 'jquery'
 
 const InputGroup = Input.Group
 const Step = Steps.Step
 const { TextArea } = Input
 const Option = Select.Option
 
+var ops = null
+var tbs = null
 
 
 
@@ -118,18 +121,81 @@ class ConfigFlow extends React.Component {
             "margin-top": "24px",
         }
 
+        const genOps = () => {
+            const url = "http://localhost:8088/api/showSource"
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: null,
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    let datas = data.data
+                    ops = []
+                    for (let op of datas) {
+                        let o = <Option value={op}>{op}</Option>
+                        ops.push(o)
+                    }
+                    return ops
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
+        }
 
+
+        const genTOps = (name) => {
+            const url = "http://localhost:8088/api/showSourceTable"
+            let params = {
+                "dataSourceName": name
+            }
+            console.log("name", name)
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: JSON.stringify(params),
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    // debugger
+                    let datas = data.data
+                    tbs = []
+                    for (let op of datas) {
+                        let o = <Option value={op}>{op}</Option>
+                        tbs.push(o)
+                    }
+                    return tbs
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
+        }
 
 
         const selectSource = () => {
 
             function handleChange(value) {
                 source = value
+                console.log("tbssss", tbs)
+
             }
 
             function handleChangeTable(value) {
                 sourceTable = value
             }
+            
+            function handleOnSelect(value, option) {
+                console.log("onselect value", value)
+                console.log("onoption value", option)
+                source = value
+            }
+
 
             return <div>
                 <div style={{marginBottom: "10px"}}>
@@ -145,12 +211,15 @@ class ConfigFlow extends React.Component {
                                 optionFilterProp="children"
                                 key="source"
                                 onChange={handleChange}
+                                onSelect={handleOnSelect}
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="源1">源1</Option>
-                                <Option value="源2">源2</Option>
-                                <Option value="源3">源3</Option>
+
+                                {genOps()}
+                                {ops}
+
+
                             </Select>
                         </Col>
                     </Row>
@@ -174,9 +243,10 @@ class ConfigFlow extends React.Component {
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="user">user</Option>
-                                <Option value="pay">pay</Option>
-                                <Option value="order">order</Option>
+                                {genTOps(source)}
+                                {tbs}
+                                {console.log("dsadsadsadsadasdsa", tbs)}
+
                             </Select>
                         </Col>
                     </Row>
