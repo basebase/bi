@@ -16,7 +16,15 @@ const Option = Select.Option
 
 var ops = null
 var tbs = null
+var target_tbs = null
 
+var s_igs = []
+var t_igs = []
+
+// 源字段input refs数
+var source_inputs = []
+//目标字段refs数
+var target_inputs = []
 
 
 // 步骤1参数
@@ -59,17 +67,62 @@ class ConfigFlow extends React.Component {
     saveDBSyncConfiguration = () => {
         const url = "http://localhost:8088/api/saveDBSyncConfiguration"
 
-        let skv1 = this.refs.s01.input.value + "-" + this.refs.s01_.input.value
-        let skv2 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
-        let skv3 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
+        // let skv1 = this.refs.s01.input.value + "-" + this.refs.s01_.input.value
+        // let skv2 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
+        // let skv3 = this.refs.s02.input.value + "-" + this.refs.s02_.input.value
+        //
+        //
+        // let tkv1 = this.refs.t01.input.value + "-" + this.refs.t01_.input.value
+        // let tkv2 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
+        // let tkv3 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
+        //
+        // let fieldMapper = [[skv1, tkv1], [skv2, tkv2], [skv3, tkv3]]
+        let inputs_length = null
+        if (source_inputs != null && target_inputs != null && source_inputs !== undefined && target_inputs !== undefined
+            && source_inputs !== "undefined" && target_inputs !== "undefined") {
+            inputs_length = source_inputs.length > target_inputs.length ? source_inputs.length : target_inputs.length
+        }
 
 
-        let tkv1 = this.refs.t01.input.value + "-" + this.refs.t01_.input.value
-        let tkv2 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
-        let tkv3 = this.refs.t02.input.value + "-" + this.refs.t02_.input.value
+        let fms = []
+        for(let i = 0; i <inputs_length; i++) {
 
-        let fieldMapper = [[skv1, tkv1], [skv2, tkv2], [skv3, tkv3]]
-        let s = JSON.stringify(fieldMapper)
+            let sourceData = ""
+            let targetData = ""
+            let s_field = ""
+            let s_field_type = ""
+            let t_field = ""
+            let t_field_type = ""
+            let s = "-"
+            let f = "-"
+
+
+            if (source_inputs[i] != null) {
+                sourceData = source_inputs[i].split("-")
+                s_field = sourceData[0]
+                s_field_type = sourceData[1]
+                s = document.getElementById(s_field).value + "-" + document.getElementById(s_field_type).value
+            }
+
+            if (target_inputs[i] != null) {
+                targetData = target_inputs[i].split("-")
+                t_field = targetData[0]
+                t_field_type = targetData[1]
+                f = document.getElementById(t_field).value + "-" + document.getElementById(t_field_type).value
+            }
+
+
+
+            let fm = [s, f]
+            fms.push(fm)
+        }
+
+
+
+
+
+        // let s = JSON.stringify(fieldMapper)
+        let s = JSON.stringify(fms)
         console.log("s", s)
 
         let data = {
@@ -147,7 +200,7 @@ class ConfigFlow extends React.Component {
         }
 
 
-        const genTOps = (name) => {
+        const genTOps = (name, flag) => {
             const url = "http://localhost:8088/api/showSourceTable"
             let params = {
                 "dataSourceName": name
@@ -165,9 +218,11 @@ class ConfigFlow extends React.Component {
                     // debugger
                     let datas = data.data
                     tbs = []
+                    target_tbs = []
                     for (let op of datas) {
                         let o = <Option value={op}>{op}</Option>
-                        tbs.push(o)
+                        flag === 1 ? tbs.push(o) : target_tbs.push(o)
+                        // tbs.push(o)
                     }
                     return tbs
                 }.bind(this),
@@ -186,10 +241,6 @@ class ConfigFlow extends React.Component {
 
             }
 
-            function handleChangeTable(value) {
-                sourceTable = value
-            }
-            
             function handleOnSelect(value, option) {
                 console.log("onselect value", value)
                 console.log("onoption value", option)
@@ -224,6 +275,20 @@ class ConfigFlow extends React.Component {
                         </Col>
                     </Row>
                 </div>
+            </div>
+        }
+
+        const selectSourceTable = () => {
+
+            function handleChangeTable(value) {
+                sourceTable = value
+            }
+
+            function handleOnSelect(value, option) {
+                sourceTable = value
+            }
+
+            return <div>
                 <div>
                     <Row gutter={8}>
                         <Col span={6}>
@@ -238,15 +303,14 @@ class ConfigFlow extends React.Component {
                                 optionFilterProp="children"
                                 key="sourceTable"
                                 onChange={handleChangeTable}
+                                onSelect={handleOnSelect}
                                 // onFocus={handleFocus}
                                 // onBlur={handleBlur}
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                {genTOps(source)}
+                                {genTOps(source, 1)}
                                 {tbs}
-                                {console.log("dsadsadsadsadasdsa", tbs)}
-
                             </Select>
                         </Col>
                     </Row>
@@ -259,7 +323,46 @@ class ConfigFlow extends React.Component {
                 targetSource = value
             }
 
+            function handleOnSelect(value, option) {
+                targetSource = value
+            }
+
+
+            return <div>
+                <div style={{marginBottom: "10px"}}>
+                    <Row gutter={8}>
+                        <Col span={6}>
+                            目标源
+                        </Col>
+                        <Col span={8}>
+                            <Select
+                                showSearch
+                                style={{width: 400}}
+                                placeholder="选择数据源"
+                                optionFilterProp="children"
+                                key="targetSelect"
+                                onChange={handleChangeTargetSource}
+                                onselect={handleOnSelect}
+                                filterOption={(input, option) =>
+                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                            >
+                                {genOps()}
+                                {ops}
+                            </Select>
+                        </Col>
+                    </Row>
+                </div>
+            </div>
+        }
+
+
+        const selectTargetSourceTable = () => {
+
             function handleChangeTargetSourceTable(value) {
+                targetSourceTable = value
+            }
+
+            function handleOnSelect(value, option) {
                 targetSourceTable = value
             }
 
@@ -281,29 +384,6 @@ class ConfigFlow extends React.Component {
                 <div style={{marginBottom: "10px"}}>
                     <Row gutter={8}>
                         <Col span={6}>
-                            目标源
-                        </Col>
-                        <Col span={8}>
-                            <Select
-                                showSearch
-                                style={{width: 400}}
-                                placeholder="选择数据源"
-                                optionFilterProp="children"
-                                key="targetSelect"
-                                onChange={handleChangeTargetSource}
-                                filterOption={(input, option) =>
-                                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                            >
-                                <Option value="目标1">目标1</Option>
-                                <Option value="目标2">目标2</Option>
-                                <Option value="目标3">目标3</Option>
-                            </Select>
-                        </Col>
-                    </Row>
-                </div>
-                <div style={{marginBottom: "10px"}}>
-                    <Row gutter={8}>
-                        <Col span={6}>
                             表
                         </Col>
                         <Col span={8}>
@@ -314,12 +394,13 @@ class ConfigFlow extends React.Component {
                                 optionFilterProp="children"
                                 key="targetTable"
                                 onChange={handleChangeTargetSourceTable}
+                                onSelect={handleOnSelect}
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="user">user</Option>
-                                <Option value="pay">pay</Option>
-                                <Option value="order">order</Option>
+
+                                {genTOps(targetSource, 2)}
+                                {target_tbs}
                             </Select>
                         </Col>
                     </Row>
@@ -371,37 +452,76 @@ class ConfigFlow extends React.Component {
             </div>
         }
 
+
+        const genField = (flag) => {
+
+            const url = "http://localhost:8088/api/showSourceTableField"
+
+            let data = {
+                "dataSourceName": flag === 1 ? source : targetSource,
+                "table": flag === 1 ? sourceTable : targetSourceTable
+            }
+
+            console.log("dataaaaaaaaaa", data)
+
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    let datas = data.data
+                    s_igs = []
+                    t_igs = []
+
+                    if (flag === 1) {
+                        source_inputs = []
+                    } else {
+                        target_inputs = []
+                    }
+
+                    let count = 1
+                    for (let dd in datas) {
+
+                        let field = flag === 1 ? "s" + count : "t" + count
+                        let field_type = flag === 1 ? "s" + count + "_" : "t" + count + "_"
+
+
+                        let ig = <InputGroup compact>
+                            <Input id={field} ref={field} style={{ width: '40%' }} defaultValue={dd} />
+                            <Input id={field_type} ref={field_type} style={{ width: '40%' }} defaultValue={datas[dd]} />
+                        </InputGroup>
+                        ++count
+                        if (flag === 1) {
+                            s_igs.push(ig)
+                            source_inputs.push(field + "-" + field_type)
+                        } else {
+                            t_igs.push(ig)
+                            target_inputs.push(field + "-" + field_type)
+                        }
+                    }
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
+
+        }
+
         const fieldMapper = () => {
             return <div>
                 <Row gutter={8}>
                     <Col span={8}>
-                        <InputGroup compact>
-                            <Input ref="s01" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="s01_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input ref="s02" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="s02_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input ref="s03" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="s03_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
+                        {genField(1)}
+                        {s_igs}
                     </Col>
                     <Col span={8}/>
                     <Col span={8}>
-                        <InputGroup compact>
-                            <Input ref="t01" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="t01_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input ref="t02" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="t02_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
-                        <InputGroup compact>
-                            <Input ref="t03" style={{ width: '20%' }} defaultValue="0571" />
-                            <Input ref="t03_" style={{ width: '30%' }} defaultValue="26888888" />
-                        </InputGroup>
+                        {genField(2)}
+                        {t_igs}
                     </Col>
                 </Row>
             </div>
@@ -434,8 +554,14 @@ class ConfigFlow extends React.Component {
             title: '选择来源',
             content: selectSource(),
         },{
-            title: '选择目标',
+            title: '选择来源表',
+            content: selectSourceTable(),
+        },{
+            title: '选择目标源',
             content: selectTargetSource(),
+        },{
+            title: '选择目标表',
+            content: selectTargetSourceTable(),
         }, {
             title: '字段映射',
             content: fieldMapper(),
