@@ -17,6 +17,7 @@ export default class AddSource extends React.Component {
             loading: false,
             visible: false,
             option: '',
+            conn: true,
         }
     }
 
@@ -106,11 +107,17 @@ export default class AddSource extends React.Component {
                 fileList: [],
                 uploading: false,
             })
+            this.setState({
+                conn: false,
+            })
             message.success(res.data.data)
         }).catch((error) => {
             this.setState({
                 uploading: false,
             });
+            this.setState({
+                conn: true,
+            })
             message.error(error.response.data.message)
         })
     }
@@ -131,7 +138,7 @@ export default class AddSource extends React.Component {
                     onCancel={this.handleCancel}
                     footer={[
                         <Button key="back" onClick={this.handleCancel}>取消</Button>,
-                        <Button key="submit" type="primary" loading={loading} onClick={this.handleOk}>
+                        <Button disabled={this.state.conn} key="submit" type="primary" loading={loading} onClick={this.handleOk}>
                             添加数据源
                         </Button>,
                     ]}

@@ -3,9 +3,9 @@
  */
 
 import React from 'react'
-import { Button, Input, Select, Card, Table, Row, Col } from 'antd'
+import { Button, Input, Select, Card, Table, message } from 'antd'
 import AddSource from './addsource'
-
+import axios from 'axios'
 import { getDBSourceTable, getDBSourceTable_s } from '../../datas/datasourceColumn'
 
 const Search = Input.Search
@@ -31,47 +31,32 @@ const columns = [{
     dataIndex: 'sourceDescribe',
 },];
 
-const data = [{
-    key: '1',
-    sourceName: 'mysql_测试库',
-    sourceType: 'mysql',
-    sourceDescribe: '测试数据',
-}, {
-    key: '2',
-    sourceName: 'hive_数据',
-    sourceType: 'hive',
-    sourceDescribe: '埋点数据',
-}, {
-    key: '3',
-    sourceName: 'log',
-    sourceType: 'file',
-    sourceDescribe: '系统日志数据',
-}, {
-    key: '4',
-    sourceName: 'mysql_线上',
-    sourceType: 'mysql',
-    sourceDescribe: '线上数据库',
-}];
 
 
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: record => ({
-        disabled: record.sourceName === 'mysql_线上', // Column configuration not to be checked
-    }),
-};
+// const rowSelection = {
+//     onChange: (selectedRowKeys, selectedRows) => {
+//         console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+//     },
+//     getCheckboxProps: record => ({
+//         disabled: record.sourceName === 'mysql_线上', // Column configuration not to be checked
+//     }),
+// };
 
 export default class Configuration extends React.Component {
     constructor(props) {
         super(props)
+        this.state = {
+            loading: false,
+            selectedRowKeys: [],
+        }
     }
 
-    // componentDidMount() {
-    //     let column_s = `${getDBSourceTable_s("http://localhost:8088/api/getSourceConfig")}`
-    //     console.log("console_s", column_s)
-    // }
+
+    onSelectChange = (selectedRowKeys) => {
+        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        this.setState({ selectedRowKeys });
+    }
+
 
     search_data_source = (value) => {
         console.log(value)
@@ -89,8 +74,51 @@ export default class Configuration extends React.Component {
         console.log('focus');
     }
 
+    start = () => {
+        this.setState({
+            loading: true,
+        })
+        const url = "http://localhost:8088/api/delSourceConfig"
+        let data = {
+            "configIds": this.state.selectedRowKeys
+        }
+        console.log("daadadsadadadada", data)
+        axios({
+            url: url,
+            method: 'post',
+            data: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then((res) => {
+            this.setState({
+                selectedRowKeys: [],
+                loading: false,
+            });
+            message.success(res.data.data)
+        }).catch((error) => {
+            this.setState({
+                loading: false,
+            });
+            message.error(error.response.data.message)
+        })
+    }
+
+    onSelectChange = (selectedRowKeys) => {
+        this.setState({ selectedRowKeys });
+    }
 
     render() {
+
+        const { loading, selectedRowKeys } = this.state;
+
+        const hasSelected = this.state.selectedRowKeys.length > 0;
+
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: this.onSelectChange,
+        }
+
         return (
             <div>
                 <Card title="搜索域" style={{ "margin-bottom": "10px" }}>
@@ -130,7 +158,22 @@ export default class Configuration extends React.Component {
                     </div>
                 </Card>
 
+
+
                 <Card title="数据源展示域">
+                    <div style={{ marginBottom: 16 }}>
+                        <Button
+                            type="primary"
+                            onClick={this.start}
+                            disabled={!hasSelected}
+                            loading={loading}
+                        >
+                            删除
+                        </Button>
+                        <span style={{ marginLeft: 8 }}>
+                            {hasSelected ? `选中 ${selectedRowKeys.length} 条数据` : ''}
+                        </span>
+                    </div>
                     <Table size="small" rowSelection={rowSelection} columns={columns} dataSource={cols} />
                 </Card>
             </div>
