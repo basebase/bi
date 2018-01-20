@@ -4,6 +4,7 @@
 
 
 import React from 'react'
+import $ from 'jquery'
 import { Steps, Button, message, Card, Select, Row, Col, Input } from 'antd'
 import {withRouter} from 'react-router-dom';
 // import routes from '../../routes/index'
@@ -15,6 +16,14 @@ const { TextArea } = Input
 const Option = Select.Option
 
 var renderCount = 0
+
+var tbs = null
+var target_tbs = null
+var ops = null
+
+var s_igs = []
+var t_igs = []
+
 
 // 源字段input refs数
 var source_inputs = []
@@ -71,27 +80,42 @@ export default class TaskConfig extends React.Component {
 
         let inputs_length = null
 
-        console.log("taskName", taskName)
 
         if (source_inputs != null && target_inputs != null && source_inputs !== undefined && target_inputs !== undefined
         && source_inputs !== "undefined" && target_inputs !== "undefined") {
-            inputs_length = source_inputs.length > target_inputs ? source_inputs.length : target_inputs.length
+            inputs_length = source_inputs.length > target_inputs.length ? source_inputs.length : target_inputs.length
         }
 
 
         let fms = []
+
         for(let i = 0; i <inputs_length; i++) {
-            let sourceData = source_inputs[i].split("-")
-            let targetData = target_inputs[i].split("-")
 
-            let s_field = sourceData[0]
-            let s_field_type = sourceData[1]
+            let sourceData = ""
+            let targetData = ""
+            let s_field = ""
+            let s_field_type = ""
+            let t_field = ""
+            let t_field_type = ""
+            let s = "-"
+            let f = "-"
 
-            let t_field = targetData[0]
-            let t_field_type = targetData[1]
 
-            let s = document.getElementById(s_field).value + "-" + document.getElementById(s_field_type).value
-            let f = document.getElementById(t_field).value + "-" + document.getElementById(t_field_type).value
+            if (source_inputs[i] != null) {
+                sourceData = source_inputs[i].split("-")
+                s_field = sourceData[0]
+                s_field_type = sourceData[1]
+                s = document.getElementById(s_field).value + "-" + document.getElementById(s_field_type).value
+            }
+
+            if (target_inputs[i] != null) {
+                targetData = target_inputs[i].split("-")
+                t_field = targetData[0]
+                t_field_type = targetData[1]
+                f = document.getElementById(t_field).value + "-" + document.getElementById(t_field_type).value
+            }
+
+
 
             let fm = [s, f]
             fms.push(fm)
@@ -106,7 +130,7 @@ export default class TaskConfig extends React.Component {
             "targetSourceTable": targetSourceTable,
             "importBeforeData": importBeforeData,
             "importAfterData": importAfterData,
-            "overwrite": overwrite,
+            "overwrite": overwrite === "否" ? 2 : 1,
             "taskName": taskName,
             "fieldMapper": s,
             "configId": configId,
@@ -136,7 +160,6 @@ export default class TaskConfig extends React.Component {
 
     render() {
 
-        console.log("render...!" + taskName)
 
         const {fieldMapperx, config_id, importAfterDatax, importBeforeDatax,
             overwritex, sourcex, sourceTablex, targetSourcex, targetSourceTablex, taskNamex, tag} = {...this.props}
@@ -174,16 +197,35 @@ export default class TaskConfig extends React.Component {
         }
 
 
-
+        const genOps = () => {
+            const url = "http://localhost:8088/api/showSource"
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: null,
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    let datas = data.data
+                    ops = []
+                    for (let op of datas) {
+                        let o = <Option value={op}>{op}</Option>
+                        ops.push(o)
+                    }
+                    return ops
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
+        }
 
         const selectSource = () => {
 
             function handleChange(value) {
                 source = value
-            }
-
-            function handleChangeTable(value) {
-                sourceTable = value
             }
 
             return <div>
@@ -206,13 +248,27 @@ export default class TaskConfig extends React.Component {
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="源1">源1</Option>
-                                <Option value="源2">源2</Option>
-                                <Option value="源3">源3</Option>
+                                {genOps()}
+                                {ops}
                             </Select>
                         </Col>
                     </Row>
                 </div>
+            </div>
+        }
+
+
+        const selectSourceTable = () => {
+
+            function handleChangeTable(value) {
+                sourceTable = value
+            }
+
+            function handleOnSelect(value, option) {
+                sourceTable = value
+            }
+
+            return <div>
                 <div>
                     <Row gutter={8}>
                         <Col span={6}>
@@ -230,14 +286,12 @@ export default class TaskConfig extends React.Component {
                                 optionFilterProp="children"
                                 key="sourceTable"
                                 onChange={handleChangeTable}
-                                // onFocus={handleFocus}
-                                // onBlur={handleBlur}
+                                onSelect={handleOnSelect}
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="user">user</Option>
-                                <Option value="pay">pay</Option>
-                                <Option value="order">order</Option>
+                                {genTOps(source, 1)}
+                                {tbs}
                             </Select>
                         </Col>
                     </Row>
@@ -288,13 +342,71 @@ export default class TaskConfig extends React.Component {
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="目标1">目标1</Option>
-                                <Option value="目标2">目标2</Option>
-                                <Option value="目标3">目标3</Option>
+                                {genOps()}
+                                {ops}
                             </Select>
                         </Col>
                     </Row>
                 </div>
+            </div>
+        }
+
+
+        const genTOps = (name, flag) => {
+            const url = "http://localhost:8088/api/showSourceTable"
+            let params = {
+                "dataSourceName": name
+            }
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: JSON.stringify(params),
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    // debugger
+                    let datas = data.data
+                    tbs = []
+                    target_tbs = []
+                    for (let op of datas) {
+                        let o = <Option value={op}>{op}</Option>
+                        flag === 1 ? tbs.push(o) : target_tbs.push(o)
+                    }
+                    return tbs
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
+        }
+
+
+        const selectTargetSourceTable = () => {
+            function handleChangeTargetSourceTable(value) {
+                targetSourceTable = value
+            }
+
+            function handleOnSelect(value, option) {
+                targetSourceTable = value
+            }
+
+            function isOverwrite(value) {
+                overwrite = value
+            }
+
+            function importBeforeEntryHandle(e) {
+                let data = document.getElementById('import_before').value
+                importBeforeData = data
+            }
+
+            function importAfterEntryHandle(e) {
+                let data = document.getElementById('import_after').value
+                importAfterData = data
+            }
+
+            return <div>
                 <div style={{marginBottom: "10px"}}>
                     <Row gutter={8}>
                         <Col span={6}>
@@ -311,12 +423,13 @@ export default class TaskConfig extends React.Component {
                                 optionFilterProp="children"
                                 key="targetTable"
                                 onChange={handleChangeTargetSourceTable}
+                                onSelect={handleOnSelect}
                                 filterOption={(input, option) =>
                                 option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                             >
-                                <Option value="user">user</Option>
-                                <Option value="pay">pay</Option>
-                                <Option value="order">order</Option>
+
+                                {genTOps(targetSource, 2)}
+                                {target_tbs}
                             </Select>
                         </Col>
                     </Row>
@@ -371,73 +484,74 @@ export default class TaskConfig extends React.Component {
             </div>
         }
 
-        const getSourceField = () => {
-            if (fieldMapperx !== null && fieldMapperx !== undefined && fieldMapperx !== "fieldMapperx") {
-                const sourceField = []
-                source_inputs = []
-                let count = 1
+        const genField = (flag) => {
 
-                for (let data of fieldMapperx) {
-                    var ds = data[0].split('-')
+            const url = "http://localhost:8088/api/showSourceTableField"
 
-                    let field_ref = "s" + count
-                    let field_type_ref = "s" + count + "_"
-
-                    let inputG =
-                        <InputGroup compact>
-                            <Input id={field_ref} ref={field_ref} disabled={!tag} style={{ width: '20%' }} defaultValue={ds[0]} />
-                            <Input id={field_type_ref} ref={field_type_ref} disabled={!tag} style={{ width: '30%' }} defaultValue={ds[1]} />
-                        </InputGroup>
-
-                    source_inputs.push(field_ref + "-" + field_type_ref)
-                    ++count
-
-                    sourceField.push(inputG)
-
-                }
-                return sourceField
+            let data = {
+                "dataSourceName": flag === 1 ? source : targetSource,
+                "table": flag === 1 ? sourceTable : targetSourceTable
             }
-        }
 
 
-        const getTargetField = () => {
-            if (fieldMapperx !== null && fieldMapperx !== undefined && fieldMapperx !== "fieldMapperx") {
-                const sourceField = []
-                target_inputs = []
-                let count = 1
+            $.ajax({
+                url: url,
+                async:false, //或false,是否异步
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+                cache: false,
+                success: function(data) {
+                    let datas = data.data
+                    s_igs = []
+                    t_igs = []
 
-                for (let data of fieldMapperx) {
-                    var ds = data[1].split('-')
+                    if (flag === 1) {
+                        source_inputs = []
+                    } else {
+                        target_inputs = []
+                    }
 
-                    let field_ref = "t" + count
-                    let field_type_ref = "t" + count + "_"
+                    let count = 1
+                    for (let dd in datas) {
 
-                    let inputG =
-                        <InputGroup compact>
-                            <Input id={field_ref} ref={field_ref} disabled={!tag} style={{ width: '20%' }} defaultValue={ds[0]} />
-                            <Input id={field_type_ref} ref={field_type_ref} disabled={!tag} style={{ width: '30%' }} defaultValue={ds[1]} />
+                        let field = flag === 1 ? "s" + count : "t" + count
+                        let field_type = flag === 1 ? "s" + count + "_" : "t" + count + "_"
+
+
+                        let ig = <InputGroup compact>
+                            <Input disabled={!tag} id={field} ref={field} style={{ width: '40%' }} defaultValue={dd} />
+                            <Input disabled={!tag} id={field_type} ref={field_type} style={{ width: '40%' }} defaultValue={datas[dd]} />
                         </InputGroup>
+                        ++count
+                        if (flag === 1) {
+                            s_igs.push(ig)
+                            source_inputs.push(field + "-" + field_type)
+                        } else {
+                            t_igs.push(ig)
+                            target_inputs.push(field + "-" + field_type)
+                        }
+                    }
+                }.bind(this),
+                error: function(xhr, status, err) {
+                    console.error("getSource Err", err.toString());
+                }.bind(this)
+            });
 
-                    target_inputs.push(field_ref + "-" + field_type_ref)
-                    ++count
-
-                    sourceField.push(inputG)
-
-                }
-
-                return sourceField
-            }
         }
 
         const fieldMapper = () => {
             return <div>
                 <Row gutter={8}>
                     <Col span={8}>
-                        {getSourceField()}
+                        {genField(1)}
+                        {s_igs}
                     </Col>
                     <Col span={8}/>
                     <Col span={8}>
-                        {getTargetField()}
+                        {genField(2)}
+                        {t_igs}
                     </Col>
                 </Row>
             </div>
@@ -470,17 +584,18 @@ export default class TaskConfig extends React.Component {
             title: '选择来源',
             content: selectSource(),
         },{
-            title: '选择目标',
+            title: '选择来源表',
+            content: selectSourceTable(),
+        },{
+            title: '选择目标源',
             content: selectTargetSource(),
+        },{
+            title: '选择目标表',
+            content: selectTargetSourceTable(),
         }, {
             title: '字段映射',
             content: fieldMapper(),
-        },
-            //     {
-            //     title: '保存任务名',
-            //     content: "save",
-            // }
-        ]
+        },]
 
 
         return (

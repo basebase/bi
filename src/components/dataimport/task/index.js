@@ -83,8 +83,8 @@ export default class Task extends React.Component {
 
         Modal.info({
             title: '查看配置信息',
-            width: "900",
-            height:"800",
+            width: "1200",
+            height:"1200",
             content: (
                 <div>
                     <TaskConfig {...json_data} />
