@@ -10,6 +10,7 @@ import CsvImport from '../components/dataimport/csv/index'
 import DB from '../components/dataimport/db/index'
 import Task from '../components/dataimport/task/index'
 import DimensionShow from '../components/dataview/dimensionshow/index'
+import DataModelCreate from '../components/dataview/datamodelcreate/index'
 
 
 import Configuration from '../components/dataimport/config'
@@ -24,6 +25,7 @@ const routes = (
                 <Route exact path="/dataimport/config_meta" component={ Configuration }/>
                 <Route exact path="/dataimport/task_manage" component={ Task }/>
                 <Route exact path="/data_view/muilt_dimension_analysis" component={ DimensionShow }/>
+                <Route exact path="/data_view/data_model_create" component={ DataModelCreate }/>
             </App>
         </Switch>
     </div>

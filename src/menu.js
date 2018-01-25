@@ -44,6 +44,11 @@ const menus = [
         child: [
 
             {
+                key: 'data_model_create',
+                name: '数据模型创建'
+            },
+
+            {
                 key: 'muilt_dimension_analysis',
                 name: '多维分析'
             }
