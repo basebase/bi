@@ -11,6 +11,7 @@ import DB from '../components/dataimport/db/index'
 import Task from '../components/dataimport/task/index'
 import DimensionShow from '../components/dataview/dimensionshow/index'
 import DataModelCreate from '../components/dataview/datamodelcreate/index'
+import ModelDataList from '../components/dataview/modelshow/index'
 
 
 import Configuration from '../components/dataimport/config'
@@ -26,6 +27,7 @@ const routes = (
                 <Route exact path="/dataimport/task_manage" component={ Task }/>
                 <Route exact path="/data_view/muilt_dimension_analysis" component={ DimensionShow }/>
                 <Route exact path="/data_view/data_model_create" component={ DataModelCreate }/>
+                <Route exact path="/data_view/exist_data_model" component={ ModelDataList }/>
             </App>
         </Switch>
     </div>

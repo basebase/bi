@@ -49,6 +49,11 @@ const menus = [
             },
 
             {
+                key: 'exist_data_model',
+                name: '已存在的数据模型'
+            },
+
+            {
                 key: 'muilt_dimension_analysis',
                 name: '多维分析'
             }
