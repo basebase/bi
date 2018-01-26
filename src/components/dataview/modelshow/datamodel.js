@@ -21,12 +21,14 @@ var ops = null
 var tbs = null
 var target_tbs = null
 var tab_name = null
-const columns = []
-
-
+var columns = []
 const dimension = []
 
-export default class DataModelCreate extends React.Component {
+
+var t = null
+var l = null
+
+export default class DataModel extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -38,30 +40,8 @@ export default class DataModelCreate extends React.Component {
             tab_datas: [],
             transverse: [], //维度
             longitudinal: [], // 度量
+            tag: false,
         }
-
-
-        columns.push({
-            title: '字段名',
-            dataIndex: 'fieldName',
-        }, {
-            title: '字段类型',
-            dataIndex: 'fieldType',
-        },{
-            title: '操作',
-            key: 'action',
-            render: (text, record) => {
-                return (
-                    <div>
-               <span>
-                   <a onClick={() => this.showConfirm(record.fieldName, record.fieldType, 1)}>添加到维度</a>
-                   <Divider type="vertical"/>
-                   <a onClick={() => this.showConfirm(record.fieldName, record.fieldType, 2)}>添加到度量</a>
-               </span>
-                    </div>
-                )
-            },
-        })
     }
 
 
@@ -74,11 +54,12 @@ export default class DataModelCreate extends React.Component {
         let longitudinal = this.state.longitudinal
 
 
+        let newId = id + "-" + type
+
+
 
         let t_flag = false
         let l_flag = false
-
-        let newId = id + "-" + type
 
         if (flag === 1) {
             if (transverse.indexOf(newId) === -1 || transverse.length === 0) {
@@ -188,6 +169,14 @@ export default class DataModelCreate extends React.Component {
         })
     }
 
+
+    componentDidMount() {
+        this.setState({
+            transverse: t.split("|"), //维度
+            longitudinal: l.split("|"), // 度量
+        })
+    }
+
     render() {
 
         let style_content = {
@@ -204,8 +193,33 @@ export default class DataModelCreate extends React.Component {
             "margin-top": "24px"
         }
 
+        const {dbNamex, tabNamex, modelDescx, modelNamex, transversex, longitudinalx, tag, tabColums} = {...this.props}
 
+        t = transversex
+        l = longitudinalx
 
+        columns = []
+        columns.push({
+            title: '字段名',
+            dataIndex: 'fieldName',
+        }, {
+            title: '字段类型',
+            dataIndex: 'fieldType',
+        },{
+            title: '操作',
+            key: 'action',
+            render: (text, record) => {
+                return (
+                    <div>
+               <span>
+                   <a disabled={!tag} onClick={() => this.showConfirm(record.fieldName, record.fieldType, 1)}>添加到维度</a>
+                   <Divider type="vertical"/>
+                   <a disabled={!tag} onClick={() => this.showConfirm(record.fieldName, record.fieldType, 2)}>添加到度量</a>
+               </span>
+                    </div>
+                )
+            },
+        })
 
 
         const genOps = () => {
@@ -252,6 +266,7 @@ export default class DataModelCreate extends React.Component {
                 contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
                 cache: false,
                 success: function(data) {
+                    // debugger
                     let datas = data.data
                     tbs = []
                     target_tbs = []
@@ -276,7 +291,7 @@ export default class DataModelCreate extends React.Component {
                             模型名称
                         </Col>
                         <Col span={8}>
-                            <Input onBlur={getModelName} id="model_name" rows={4} />
+                            <Input disabled={!tag} defaultValue={modelNamex} onBlur={getModelName} id="model_name" rows={4} />
                         </Col>
                     </Row>
                 </div>
@@ -287,6 +302,9 @@ export default class DataModelCreate extends React.Component {
                         </Col>
                         <Col span={8}>
                             <Select
+                                defaultValue={dbNamex}
+                                allowClear={!tag}
+                                disabled={!tag}
                                 showSearch
                                 style={{ width: 200 }}
                                 placeholder="Select a person"
@@ -308,6 +326,9 @@ export default class DataModelCreate extends React.Component {
                         </Col>
                         <Col span={8}>
                             <Select
+                                defaultValue={tabNamex}
+                                allowClear={!tag}
+                                disabled={!tag}
                                 showSearch
                                 style={{ width: 200 }}
                                 placeholder="Select a person"
@@ -328,7 +349,7 @@ export default class DataModelCreate extends React.Component {
                             备注
                         </Col>
                         <Col span={8}>
-                            <TextArea id="get_model_describe" rows={2} onPressEnter={ get_model_describe } />
+                            <TextArea disabled={!tag} defaultValue={modelDescx} id="get_model_describe" rows={2} onPressEnter={ get_model_describe } />
                         </Col>
                     </Row>
                 </div>
@@ -445,13 +466,13 @@ export default class DataModelCreate extends React.Component {
             return <div>
                 <Row gutter={48}>
                     <Col span={12}>
-                        <Table pagination={false} columns={columns} dataSource={this.state.tab_datas} size="small" />
+                        <Table pagination={false} columns={columns} disabled={!tag} dataSource={tabColums} size="small" />
                     </Col>
                     <Col style={{ "margin-bottom": "10px" }} span={8}>
-                        <TextArea value={this.state.transverse} placeholder="维度数据在这里展示" rows={4} />
+                        <TextArea disabled={!tag} value={this.state.transverse} placeholder="维度数据在这里展示" rows={4} />
                     </Col>
                     <Col span={8}>
-                        <TextArea value={this.state.longitudinal} placeholder="度量数据在这里展示" rows={4} />
+                        <TextArea disabled={!tag} value={this.state.longitudinal} placeholder="度量数据在这里展示" rows={4} />
                     </Col>
                 </Row>
             </div>
@@ -493,7 +514,7 @@ export default class DataModelCreate extends React.Component {
                         {
                             this.state.current === steps.length - 1
                             &&
-                            <Button type="primary" onClick={this.save_data_model}>保存配置</Button>
+                            <Button disabled={!tag} type="primary" onClick={this.save_data_model}>保存配置</Button>
                         }
                         {
                             this.state.current > 0
