@@ -168,8 +168,8 @@ export default class DataModelCreate extends React.Component {
             "tabName": this.state.tab_name,
             "modelDesc": this.state.model_desc,
             "modelName": this.state.model_name,
-            "transverse": this.state.transverse.join("|"),
-            "longitudinal": this.state.longitudinal.join("|"),
+            "transverse": this.state.transverse.length === 0 || this.state.transverse === null ? null : this.state.transverse.join("|"),
+            "longitudinal": this.state.longitudinal.length === 0 || this.state.longitudinal === null ? null : this.state.longitudinal.join("|"),
         }
 
         axios({

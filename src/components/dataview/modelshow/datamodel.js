@@ -27,6 +27,12 @@ const dimension = []
 
 var t = null
 var l = null
+var id = null
+
+var dbName = null
+var tabName = null
+var modelName = null
+var modelDesc = null
 
 export default class DataModel extends React.Component {
     constructor(props) {
@@ -41,6 +47,7 @@ export default class DataModel extends React.Component {
             transverse: [], //维度
             longitudinal: [], // 度量
             tag: false,
+            id: null,
         }
     }
 
@@ -49,7 +56,6 @@ export default class DataModel extends React.Component {
 
 
     showConfirm = (id, type, flag) => {
-        console.log("id----", id)
         let transverse = this.state.transverse
         let longitudinal = this.state.longitudinal
 
@@ -60,6 +66,11 @@ export default class DataModel extends React.Component {
 
         let t_flag = false
         let l_flag = false
+
+        if (transverse === null)
+            transverse = []
+        if (longitudinal === null)
+            longitudinal = []
 
         if (flag === 1) {
             if (transverse.indexOf(newId) === -1 || transverse.length === 0) {
@@ -142,15 +153,16 @@ export default class DataModel extends React.Component {
     }
 
     save_data_model = () => {
-        const url = "http://localhost:8088/api/saveDataModel"
+        const url = "http://localhost:8088/api/updateDataModel"
 
         let data = {
+            "key": this.state.id,
             "dbName": this.state.db_name,
             "tabName": this.state.tab_name,
             "modelDesc": this.state.model_desc,
             "modelName": this.state.model_name,
-            "transverse": this.state.transverse.join("|"),
-            "longitudinal": this.state.longitudinal.join("|"),
+            "transverse": this.state.transverse.length === 0 || this.state.transverse === null ? null : this.state.transverse.join("|"),
+            "longitudinal": this.state.longitudinal.length === 0 || this.state.longitudinal === null ? null : this.state.longitudinal.join("|"),
         }
 
         axios({
@@ -172,8 +184,13 @@ export default class DataModel extends React.Component {
 
     componentDidMount() {
         this.setState({
-            transverse: t.split("|"), //维度
-            longitudinal: l.split("|"), // 度量
+            db_name: dbName,
+            tab_name: tabName,
+            model_name: modelName,
+            model_desc: modelDesc,
+            transverse: t !== null ? t.split("|") : null, //维度
+            longitudinal: l !== null ? l.split("|") : null, // 度量
+            id: id,
         })
     }
 
@@ -193,10 +210,19 @@ export default class DataModel extends React.Component {
             "margin-top": "24px"
         }
 
-        const {dbNamex, tabNamex, modelDescx, modelNamex, transversex, longitudinalx, tag, tabColums} = {...this.props}
+        const {dbNamex, tabNamex, modelDescx, modelNamex, transversex, longitudinalx, tag, tabColums, idx} = {...this.props}
 
         t = transversex
         l = longitudinalx
+        id = idx
+
+        console.log("dasdsadsadsadsadasdsadtabColums", tabColums)
+
+
+        dbName = dbNamex
+        tabName = tabNamex
+        modelName = modelNamex
+        modelDesc = modelDescx
 
         columns = []
         columns.push({
@@ -250,7 +276,6 @@ export default class DataModel extends React.Component {
 
         const genTOps = (flag) => {
 
-            console.log("db_name", this.state.db_name)
 
             const url = "http://localhost:8088/api/showSourceTable"
             let params = {
@@ -303,8 +328,8 @@ export default class DataModel extends React.Component {
                         <Col span={8}>
                             <Select
                                 defaultValue={dbNamex}
-                                allowClear={!tag}
-                                disabled={!tag}
+                                allowClear={true}
+                                disabled={true}
                                 showSearch
                                 style={{ width: 200 }}
                                 placeholder="Select a person"
@@ -327,8 +352,8 @@ export default class DataModel extends React.Component {
                         <Col span={8}>
                             <Select
                                 defaultValue={tabNamex}
-                                allowClear={!tag}
-                                disabled={!tag}
+                                allowClear={true}
+                                disabled={true}
                                 showSearch
                                 style={{ width: 200 }}
                                 placeholder="Select a person"
@@ -362,27 +387,23 @@ export default class DataModel extends React.Component {
 
         const getModelName = () => {
             let model_name = document.getElementById("model_name").value
-            console.log("model_name", model_name)
             this.setState({
                 model_name: model_name
             }, ()=>console.log(this.state))
         }
 
         const db_source_change_handle = (value) => {
-            console.log("db_source_change_handle", value)
             db_name = value
             this.setState({db_name: value}, ()=>console.log(this.state))
         }
 
         const db_source_select_handle = (value, option) => {
-            console.log("db_source_select_handle", value)
             db_name = value
             this.setState({db_name: value}, ()=>console.log(this.state))
         }
 
 
         const tab_source_change_handle = (value) => {
-            console.log("db_source_change_handle", value)
             tab_name = value
             this.setState({
                 tab_name: value
@@ -392,7 +413,6 @@ export default class DataModel extends React.Component {
         }
 
         const tab_source_select_handle = (value, option) => {
-            console.log("db_source_select_handle", value)
             tab_name = value
             this.setState({
                 tab_name: value

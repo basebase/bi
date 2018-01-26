@@ -3,13 +3,22 @@
  */
 
 import React from 'react'
-import { Table, Input, Modal,Divider } from 'antd'
+import $ from 'jquery'
+import { Table, Input, Modal,Divider, message } from 'antd'
 import { getDBSourceTable_s, getData } from '../../../datas/datasourceColumn'
 import DataModel from './datamodel'
+import axios from 'axios'
+
+
+const confirm = Modal.confirm
+var tabs = null
 
 export default class ModelDataList extends React.Component {
     constructor(props) {
         super(props)
+        this.state = {
+            tab_datas: [],
+        }
         this.columns = [{
             title: '模型名称',
             dataIndex: 'modelName',
@@ -36,6 +45,8 @@ export default class ModelDataList extends React.Component {
                         <a style={{"margin-right": "8px"}} onClick={() => this.showAndEdit(record.key, false)}>查看</a>
                         <Divider type="vertical"/>
                         <a style={{"margin-right": "8px"}} onClick={() => this.showAndEdit(record.key, true)}>编辑</a>
+                        <Divider type="vertical"/>
+                        <a style={{"margin-right": "8px"}} onClick={() => this.delDataModel(record.key)}>删除</a>
                     </div>
                 );
             },
@@ -44,6 +55,85 @@ export default class ModelDataList extends React.Component {
 
         let data = getDBSourceTable_s("http://localhost:8088/api/showDataModelList")
         this.datas = data === undefined || data === null ? null : JSON.parse(data)
+    }
+
+
+    delDataModel = (id) => {
+
+        confirm({
+            title: '删除模型?',
+            content: '请确认是否删除该模型配置信息',
+            okText: '是',
+            okType: 'danger',
+            cancelText: '否',
+            onOk() {
+                const url = "http://localhost:8088/api/delDataModel"
+                let data = {
+                    "key": id,
+                }
+                axios({
+                    url: url,
+                    method: 'post',
+                    data: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then((res) => {
+                    message.success(res.data.data)
+                }).catch((error) => {
+                    message.error(error.response.data.message)
+                })
+            },
+            onCancel() {
+            },
+        })
+    }
+
+    genField = (db_name, tab_name) => {
+
+        const url = "http://localhost:8088/api/showSourceTableField"
+
+        let data = {
+            "dataSourceName": db_name,
+            "table": tab_name
+        }
+
+
+        $.ajax({
+            url: url,
+            async:false, //或false,是否异步
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json', // 需要加这一句, 否则会提示Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+            cache: false,
+            success: function(data) {
+                let datas = data.data
+                let tab_datas = []
+                let count = 1
+
+                for (let dd in datas) {
+                    tab_datas.push({
+                        key: count,
+                        fieldName: dd,
+                        fieldType: datas[dd],
+                    })
+
+                    ++count
+                }
+
+                tabs = tab_datas
+
+                this.setState({
+                    tab_datas: tab_datas
+                }, ()=>console.log(this.state))
+
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error("getSource Err", err.toString());
+            }.bind(this)
+        });
+
     }
 
 
@@ -68,28 +158,16 @@ export default class ModelDataList extends React.Component {
             json_data.transversex = json_data.transverse
             json_data.longitudinalx = json_data.longitudinal
             json_data.tag = tag
+            json_data.idx = key
 
 
-            const tabColums = []
 
-            for (let tran of json_data.transverse.split("|")) {
-                let nt = tran.split("-")
-                tabColums.push({
-                    "fieldName": nt[0],
-                    "fieldType": nt[1]
-                })
-            }
-
-            for (let tran of json_data.longitudinal.split("|")) {
-                let nt = tran.split("-")
-                tabColums.push({
-                    "fieldName": nt[0],
-                    "fieldType": nt[1]
-                })
-            }
+            this.genField(json_data.dbName, json_data.tabName)
 
 
-            json_data.tabColums = tabColums
+
+            json_data.tabColums = tabs
+            console.log("dasdasdsadasdsadjson_data.tabColums", json_data.tabColums)
 
         }
 
