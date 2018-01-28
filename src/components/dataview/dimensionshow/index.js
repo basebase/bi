@@ -3,14 +3,23 @@
  */
 
 import React from 'react'
-import { Card, Row, Col, Tree, Input, Form, Button, Modal, Icon, Table, Select } from 'antd'
+import { Card, Row, Col, Tree, Input, Form, Button, Modal, Icon, Table, Select, Radio } from 'antd'
 
 import {getDBSourceTable_s, getData} from '../../../datas/datasourceColumn'
+import { genBar, genReportData } from '../report/genrep'
+
+
+import 'echarts/lib/chart/custom'
+import 'echarts/lib/chart/bar'
+import 'echarts/lib/component/tooltip'
+import 'echarts/lib/component/title'
+import echarts from 'echarts'
 
 const TreeNode = Tree.TreeNode
 const FormItem = Form.Item
 const { TextArea } = Input
 const confirm = Modal.confirm
+const RadioGroup = Radio.Group
 
 
 
@@ -25,6 +34,7 @@ class DimensionShow extends React.Component {
             y: null,
             type: null,
             type_val: null,
+            radio_value: 1,
         }
 
 
@@ -214,6 +224,75 @@ class DimensionShow extends React.Component {
 
     }
 
+    radioChange = (e) => {
+        console.log("e.target.value", e.target.value)
+        this.setState({
+            radio_value: e.target.value,
+        }, ()=>console.log(this.state));
+    }
+
+    genGraphics = () => {
+        if (this.state.model_name_id === null) {
+            return
+        } else {
+
+            const radioStyle = {
+                display: 'block',
+                height: '30px',
+                lineHeight: '30px',
+            };
+
+            return (
+
+
+                <Card title="数据展示区">
+                    <Row gutter={48}>
+                        <Col span={4}>
+                            <RadioGroup onChange={this.radioChange} value={this.state.radio_value}>
+                                <Radio style={radioStyle} value={1}>表格</Radio>
+                                <Radio style={radioStyle} value={2}>柱状图</Radio>
+                                <Radio style={radioStyle} value={3}>饼图</Radio>
+                                <Radio style={radioStyle} value={4}>折线图</Radio>
+                            </RadioGroup>
+                        </Col>
+
+                        <Col span={8}>
+                            <div id="report" style={{width: "300%", height: "300%"}}></div>
+                            {this.gen_graphics()}
+                        </Col>
+                        <Col span={4} />
+                        <Col span={4} />
+                        <Col span={4} />
+                    </Row>
+                </Card>
+            )
+        }
+    }
+
+
+    gen_graphics = () => {
+        let context = document.getElementById('report')
+
+        if (context !== null && context !== undefined) {
+            var myChart = echarts.init(context);
+            myChart.setOption({
+                title: {
+                    text: 'ECharts 入门示例'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子1', '袜子2', '袜子3', '袜子4', '袜子5', '袜子6', '袜子7']
+                },
+                yAxis: {},
+                series: [{
+                    name: '销量',
+                    type: 'bar',
+                    data: [5, 20, 36, 10, 10, 20, 22, 23, 11, 99, 77, 101]
+                }]
+            });
+        }
+    }
+
     render() {
         return (
             <div>
@@ -257,9 +336,8 @@ class DimensionShow extends React.Component {
                     </Row>
                 </Card>
 
-                <Card title="数据展示区">
-                    Hellox
-                </Card>
+
+                {this.genGraphics()}
             </div>
         );
     }
