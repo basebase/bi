@@ -269,12 +269,54 @@ class DimensionShow extends React.Component {
     }
 
     serach = () => {
+
+
+        let xStr_S = "{"
+        let xStr_C = ""
+        let xStr_E = "}"
+
+        if (this.state.x !== null) {
+            for (let option of this.state.x) {
+                let v = document.getElementById(option).value
+                console.log("dsadadasdasdasdsadsadsadasx", v)
+                if (v === null || v === "" || v === undefined )
+                    v = "\"notwhere\""
+                xStr_C += option + ":" + v + ","
+            }
+        }
+
+        let x = xStr_S + xStr_C.substring(0, xStr_C.length - 1) + xStr_E
+
+
+        // 聚合选项参数
+        let tree_y_map = this.state.tree_y_map
+
+        let yStr_S = "{"
+        let yStr_C = ""
+        let yStr_E = "}"
+
+
+        tree_y_map.forEach((v, k) => {
+            yStr_C += k + ":" + v + ","
+        })
+
+        let y = yStr_S + yStr_C.substring(0, yStr_C.length - 1) + yStr_E
+
+
+        console.log("xstr", x)
+        console.log("ystr", y)
+
+
+
         let params = {
             "tableName": this.state.table_name,
-            "x": this.state.x,
-            "y": this.state.y,
+            "transverse": x,
+            "longitudinal": y,
         }
-        // let data = getData("http://localhost:8088/api/getBarData", JSON.stringify(params))
+
+        console.log(params)
+
+        let data = getData("http://localhost:8088/api/getReportData", JSON.stringify(params))
     }
 
     radioChange = (e) => {
