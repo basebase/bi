@@ -42,6 +42,8 @@ class DimensionShow extends React.Component {
             options: [],
             tree_y_radio: 0,
             tree_y_map: null,
+            data_show: false,
+            data: null
         }
 
 
@@ -144,7 +146,7 @@ class DimensionShow extends React.Component {
                         title: '选取需要的聚合方法?',
                         content: r,
                         onOk: () => {
-                            tree_y_map.set(treeTitle, select_val)
+                            tree_y_map.set(treeTitle, this.state.tree_y_radio)
                         },
                         onCancel() {
 
@@ -185,7 +187,7 @@ class DimensionShow extends React.Component {
     }
 
     tree_selectChange = (value, option) => {
-        select_val = value
+        select_val = value === 0 ? 1 : value
         this.setState({
             tree_y_radio: value
         }, ()=>console.log(this.state));
@@ -279,9 +281,12 @@ class DimensionShow extends React.Component {
             for (let option of this.state.x) {
                 let v = document.getElementById(option).value
                 console.log("dsadadasdasdasdsadsadsadasx", v)
-                if (v === null || v === "" || v === undefined )
+                if (v === null || v === "" || v === undefined ) {
                     v = "\"notwhere\""
-                xStr_C += option + ":" + v + ","
+                    xStr_C += option + ":" + v + ","
+                } else {
+                    xStr_C += option + ":" + "\"" + v + "\"" + ","
+                }
             }
         }
 
@@ -317,6 +322,9 @@ class DimensionShow extends React.Component {
         console.log(params)
 
         let data = getData("http://localhost:8088/api/getReportData", JSON.stringify(params))
+        console.log("datassssss", data)
+
+        this.setState({data_show: tree_y_map, data: data}, ()=>console.log(this.state))
     }
 
     radioChange = (e) => {
@@ -326,7 +334,7 @@ class DimensionShow extends React.Component {
     }
 
     genGraphics = () => {
-        if (this.state.model_name_id === null) {
+        if (this.state.data_show === false) {
             return
         } else {
 
@@ -351,8 +359,10 @@ class DimensionShow extends React.Component {
                         </Col>
 
                         <Col span={8}>
-                            <div id="report" style={{width: "300%", height: "300%"}}></div>
-                            {this.gen_graphics()}
+                            <div id="report" style={{width: "300%", height: "300%"}}>
+                                {this.gen_graphics(this.state.radio_value)}
+                            </div>
+
                         </Col>
                         <Col span={4} />
                         <Col span={4} />
@@ -364,131 +374,64 @@ class DimensionShow extends React.Component {
     }
 
 
-    gen_graphics = () => {
+    gen_graphics = (radio_value) => {
         let context = document.getElementById('report')
 
-        let radio_value = this.state.radio_value
-
         if (context !== null && context !== undefined) {
-            var myChart = echarts.init(context);
             if (radio_value === 1) {
 
-            } else if (radio_value === 2) {
-                myChart.setOption({
-                    title: {
-                        text: 'ECharts 入门示例'
-                    },
-                    tooltip: {},
-                    xAxis: {
-                        data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子1', '袜子2', '袜子3', '袜子4', '袜子5', '袜子6', '袜子7']
-                    },
-                    yAxis: {},
-                    series: [{
-                        name: '销量',
-                        type: 'bar',
-                        data: [5, 20, 36, 10, 10, 20, 22, 23, 11, 99, 77, 101]
-                    }]
-                })
-            } else if (radio_value === 3) {
-                myChart.setOption({
-                    title: {
-                        text: 'ECharts 入门示例'
-                    },
-                    tooltip: {},
-                    xAxis: {
-                        data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子1', '袜子2', '袜子3', '袜子4', '袜子5', '袜子6', '袜子7']
-                    },
-                    yAxis: {},
-                    series: [{
-                        name: '销量',
-                        type: 'bar',
-                        data: [5, 20, 36, 10, 10, 20, 22, 23, 11, 99, 77, 101]
-                    }]
-                })
-            } else if (radio_value === 4) {
-                myChart.setOption({
-                    title: {
-                        text: '堆叠区域图'
-                    },
-                    tooltip : {
-                        trigger: 'axis',
-                        axisPointer: {
-                            type: 'cross',
-                            label: {
-                                backgroundColor: '#6a7985'
+                const columns = []
+
+                let keys = new Array()
+
+                if (this.state.x !== null) {
+                    for (let x_data of this.state.x) {
+                        let col = {
+                            title: x_data,
+                            dataIndex: x_data,
+                            key: x_data,
+                        }
+                        columns.push(col)
+                    }
+                }
+
+                if (this.state.tree_y_map !== null) {
+                    this.state.tree_y_map.forEach((v, k) => {
+                        if (v !== 0) {
+                            let newK = ""
+                            if (v === 1) {
+                                newK += "sum(" + k + ")"
+                            } else if (v === 2) {
+                                newK += "count(" + k + ")"
+                            } else if (v === 3) {
+                                newK += "max(" + k + ")"
+                            } else if (v === 4) {
+                                newK += "min(" + k + ")"
                             }
+
+                            let col = {
+                                title: newK,
+                                dataIndex: newK,
+                                key: newK,
+                            }
+
+                            columns.push(col)
                         }
-                    },
-                    legend: {
-                        data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
-                    },
-                    toolbox: {
-                        feature: {
-                            saveAsImage: {}
-                        }
-                    },
-                    grid: {
-                        left: '3%',
-                        right: '4%',
-                        bottom: '3%',
-                        containLabel: true
-                    },
-                    xAxis : [
-                        {
-                            type : 'category',
-                            boundaryGap : false,
-                            data : ['周一','周二','周三','周四','周五','周六','周日']
-                        }
-                    ],
-                    yAxis : [
-                        {
-                            type : 'value'
-                        }
-                    ],
-                    series : [
-                        {
-                            name:'邮件营销',
-                            type:'line',
-                            stack: '总量',
-                            areaStyle: {normal: {}},
-                            data:[120, 132, 101, 134, 90, 230, 210]
-                        },
-                        {
-                            name:'联盟广告',
-                            type:'line',
-                            stack: '总量',
-                            areaStyle: {normal: {}},
-                            data:[220, 182, 191, 234, 290, 330, 310]
-                        },
-                        {
-                            name:'视频广告',
-                            type:'line',
-                            stack: '总量',
-                            areaStyle: {normal: {}},
-                            data:[150, 232, 201, 154, 190, 330, 410]
-                        },
-                        {
-                            name:'直接访问',
-                            type:'line',
-                            stack: '总量',
-                            areaStyle: {normal: {}},
-                            data:[320, 332, 301, 334, 390, 330, 320]
-                        },
-                        {
-                            name:'搜索引擎',
-                            type:'line',
-                            stack: '总量',
-                            label: {
-                                normal: {
-                                    show: true,
-                                    position: 'top'
-                                }
-                            },
-                            areaStyle: {normal: {}},
-                            data:[820, 932, 901, 934, 1290, 1330, 1320]
-                        }
-                    ]
-                })
+                    })
+                }
+
+                console.log(JSON.parse(this.state.data))
+
+                return (
+                    <Table columns={columns} dataSource={JSON.parse(this.state.data)} />
+                )
+
+            } else if (radio_value === 2) {
+
+            } else if (radio_value === 3) {
+
+            } else if (radio_value === 4) {
+
             }
         }
     }
