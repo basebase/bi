@@ -239,7 +239,7 @@ class DimensionShow extends React.Component {
                     defaultExpandedKeys={['x0']}
                     onSelect={this.treeChangeHandle}
                 >
-                    <TreeNode title="parent 1" key="0-0">
+                    <TreeNode title="数据表字段" key="0-0">
                         <TreeNode title="维度" key="x0">
                             {x}
                         </TreeNode>
@@ -319,7 +319,7 @@ class DimensionShow extends React.Component {
             "longitudinal": y,
         }
 
-        console.log(params)
+        console.log("paramsparamsparamsparams", params)
 
         let data = getData("http://localhost:8088/api/getReportData", JSON.stringify(params))
         console.log("datassssss", data)
@@ -420,11 +420,16 @@ class DimensionShow extends React.Component {
                     })
                 }
 
-                console.log(JSON.parse(this.state.data))
 
-                return (
+                if (this.state.data === undefined || this.state.data === null) {
+                    return <div>
+                        <Table columns={columns} dataSource={[]} />
+                    </div>
+                }
+
+                return <div>
                     <Table columns={columns} dataSource={JSON.parse(this.state.data)} />
-                )
+                </div>
 
             } else if (radio_value === 2) {
 
